@@ -306,11 +306,41 @@ $(PLATS) clean:
 この説明は少し正確ではなく、実際はオプションの情報(ここでは --just-print)は MAKEFLAGS変数に  
 "--just-print"の情報が保持され、makeコマンドが実行される、という流れになります。
 
+## Makefileのデバッグ
+
+### 実行されるコマンドを確認
+-n または --just-print オプションをつけて makeコマンドを実行すると、  
+実行されるコマンドのみが表示されます。このときは表示のみが行われ実際の処理は行われません。
+
+以下は "make -n aix" を実行した例です。  
+コンパイル、アーカイブの作成コマンドが出力されますが、実際には処理はされていません。  
+自分でMakefileを作成して、動作確認をしたい時に有効なオプションかと思います。
+
+```
+$ make -n aix
+cd src && /Library/Developer/CommandLineTools/usr/bin/make aix
+/Library/Developer/CommandLineTools/usr/bin/make all CC="xlc" CFLAGS="-O2 -DLUA_USE_POSIX -DLUA_USE_DLOPEN" SYSLIBS="-ldl" SYSLDFLAGS="-brtl -bexpall"
+xlc -O2 -DLUA_USE_POSIX -DLUA_USE_DLOPEN   -c -o lapi.o lapi.c
+xlc -O2 -DLUA_USE_POSIX -DLUA_USE_DLOPEN   -c -o lcode.o lcode.c
+xlc -O2 -DLUA_USE_POSIX -DLUA_USE_DLOPEN   -c -o lctype.o lctype.c
+// 省略 ...
+xlc -O2 -DLUA_USE_POSIX -DLUA_USE_DLOPEN   -c -o lutf8lib.o lutf8lib.c
+xlc -O2 -DLUA_USE_POSIX -DLUA_USE_DLOPEN   -c -o loadlib.o loadlib.c
+xlc -O2 -DLUA_USE_POSIX -DLUA_USE_DLOPEN   -c -o linit.o linit.c
+ar rcu liblua.a lapi.o lcode.o lctype.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o lmem.o lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o ltm.o lundump.o lvm.o lzio.o lauxlib.o lbaselib.o lbitlib.o lcorolib.o ldblib.o liolib.o lmathlib.o loslib.o lstrlib.o ltablib.o lutf8lib.o loadlib.o linit.o 
+ranlib liblua.a
+xlc -O2 -DLUA_USE_POSIX -DLUA_USE_DLOPEN   -c -o lua.o lua.c
+xlc -o lua -brtl -bexpall  lua.o liblua.a -lm -ldl 
+xlc -O2 -DLUA_USE_POSIX -DLUA_USE_DLOPEN   -c -o luac.o luac.c
+xlc -o luac -brtl -bexpall  luac.o liblua.a -lm -ldl $
+```
+
 # まとめ
  * Makefileの中身は、変数へ値の設定、ルールの記載が主となる。
  * 変数の展開は $(変数名) とする。ただし1文字の変数名については括弧は不要
  * MAKE 変数については $(MAKE) と書いた場合はオプションの情報も引き継がれる
  * 変数 @ はターゲット名が入る
+ * -n または --just-print コマンドで実行コマンドの出力のみができる
 
 ## 参考文献
 GNU Make  
